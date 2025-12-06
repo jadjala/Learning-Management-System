@@ -37,10 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks.index');
 });
 
-Route::post('/toggle-dark-mode', function(\Illuminate\Http\Request $request) {
-    $request->session()->put('dark_mode', $request->input('dark'));
+Route::post('/toggle-dark-mode', function(Request $request) {
+    session(['dark_mode' => $request->dark]);
     return response()->json(['success' => true]);
-})->name('toggle-dark-mode');
+});
 
 // Instructor routes
 Route::middleware(['auth', 'instructor'])->prefix('instructor')->name('instructor.')->group(function () {
@@ -65,4 +65,17 @@ Route::middleware(['auth', 'student'])->prefix('student')->name('student.')->gro
     Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])->name('courses.enroll');
     Route::delete('/courses/{course}/unenroll', [EnrollmentController::class, 'destroy'])->name('courses.unenroll');
     Route::post('/courses/{course}/toggle-complete', [EnrollmentController::class, 'toggleComplete'])->name('courses.toggle-complete');
+});
+
+Route::middleware(['auth', 'student'])->group(function () {
+    Route::get('/student/dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
+    
+    // Bookmarks
+    Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks.index');
+    Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');
+    Route::delete('/bookmarks/{course}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
+    
+    // Enrollments
+    Route::post('/enrollments', [EnrollmentController::class, 'store'])->name('enrollments.store');
+    Route::delete('/enrollments/{course}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
 });
